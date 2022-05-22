@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from 'nanoid';
 
 interface AppsDigestReadOnlyValueInterface<V> {
   currentValue: () => V;
@@ -11,10 +11,13 @@ interface AppsDigestValueInterface<V>
   publish: (newValue: V) => boolean;
 }
 
+type Subscriber<V> = {
+  callback: (value: V) => void;
+};
+
 class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
   private value: V;
-  private subscribers: Map<string, { callback: (value: V) => void }> =
-    new Map();
+  private subscribers: Map<string, Subscriber<V>> = new Map();
 
   constructor(initialValue: V) {
     this.value = initialValue;

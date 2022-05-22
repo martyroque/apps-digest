@@ -1,4 +1,4 @@
-import { AppsDigestStoreInterface, AppsDigestStoreDefinition } from "./types";
+import { AppsDigestStoreInterface, AppsDigestStoreDefinition } from './types';
 
 type StoreRecord = {
   instance: AppsDigestStoreInterface;
@@ -12,7 +12,7 @@ class AppsDigestContainer {
   constructor() {
     if (AppsDigestContainer.instance) {
       throw new Error(
-        "Error: Instantiation failed. Use AppsDigestContainer.getInstance() instead."
+        'Error: Instantiation failed. Use AppsDigestContainer.getInstance() instead.',
       );
     }
 

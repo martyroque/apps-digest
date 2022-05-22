@@ -1,1 +1,1 @@
-export * from "./AppsDigestValue";
+export * from './AppsDigestValue';
