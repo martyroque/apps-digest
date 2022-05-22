@@ -21,6 +21,10 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
 
   constructor(initialValue: V) {
     this.value = initialValue;
+    this.currentValue = this.currentValue.bind(this);
+    this.publish = this.publish.bind(this);
+    this.subscribe = this.subscribe.bind(this);
+    this.unsubscribe = this.unsubscribe.bind(this);
   }
 
   currentValue(): V {
