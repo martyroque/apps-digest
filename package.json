@@ -4,6 +4,13 @@
   "description": "Simple pub/sub state management",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martyroque/apps-digest.git"
+  },
+  "engines": {
+    "node": ">=12"
+  },
   "scripts": {
     "prepare": "tsc",
     "build": "tsc",
@@ -11,7 +18,15 @@
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "test": "jest"
   },
-  "keywords": [],
+  "keywords": [
+    "pub/sub",
+    "publish",
+    "subscribe",
+    "state",
+    "management",
+    "react",
+    "hooks"
+  ],
   "author": "Marty Roque",
   "license": "ISC",
   "husky": {
@@ -42,5 +57,17 @@
   },
   "dependencies": {
     "nanoid": "^3.3.4"
+  },
+  "peerDependencies": {
+    "@types/react": "^16.9.0 || ^17.0.0 || ^18.0.0",
+    "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   }
 }
