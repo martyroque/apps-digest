@@ -8,10 +8,10 @@ abstract class AppsDigestInjectable {
   > = new Map();
   private storeContainer = AppsDigestContainer.getInstance();
 
-  protected inject<S>(store: AppsDigestStoreDefinition<S>): S {
-    this.injectedStores.set(store.name, store);
+  protected inject<S>(storeDefinition: AppsDigestStoreDefinition<S>): S {
+    this.injectedStores.set(storeDefinition.name, storeDefinition);
 
-    return this.storeContainer.get(store);
+    return this.storeContainer.get(storeDefinition);
   }
 
   public destroy(): void {

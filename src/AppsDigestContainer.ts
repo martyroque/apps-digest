@@ -19,14 +19,14 @@ class AppsDigestContainer {
     AppsDigestContainer.instance = this;
   }
 
-  private instantiate<S>(store: AppsDigestStoreDefinition<S>) {
-    if (this.stores.has(store.name)) {
-      console.warn(`Store record for ${store.name} already exists`);
+  private instantiate<S>(storeDefinition: AppsDigestStoreDefinition<S>) {
+    if (this.stores.has(storeDefinition.name)) {
+      console.warn(`Store record for ${storeDefinition.name} already exists`);
       return;
     }
 
-    this.stores.set(store.name, {
-      instance: new store.Class(),
+    this.stores.set(storeDefinition.name, {
+      instance: new storeDefinition.Class(),
       refCount: 0,
     });
   }
@@ -35,14 +35,14 @@ class AppsDigestContainer {
     return AppsDigestContainer.instance;
   }
 
-  public get<S>(store: AppsDigestStoreDefinition<S>): S {
-    if (!this.stores.has(store.name)) {
-      this.instantiate(store);
+  public get<S>(storeDefinition: AppsDigestStoreDefinition<S>): S {
+    if (!this.stores.has(storeDefinition.name)) {
+      this.instantiate(storeDefinition);
     }
 
-    const storeRecord = this.stores.get(store.name) as StoreRecord;
+    const storeRecord = this.stores.get(storeDefinition.name) as StoreRecord;
 
-    this.stores.set(store.name, {
+    this.stores.set(storeDefinition.name, {
       ...storeRecord,
       refCount: storeRecord.refCount + 1,
     });
@@ -50,16 +50,16 @@ class AppsDigestContainer {
     return storeRecord.instance as S;
   }
 
-  public remove<S>(store: AppsDigestStoreDefinition<S>) {
-    const storeRecord = this.stores.get(store.name);
+  public remove<S>(storeDefinition: AppsDigestStoreDefinition<S>) {
+    const storeRecord = this.stores.get(storeDefinition.name);
 
     if (!storeRecord) {
-      console.warn(`Store record for ${store.name} does not exist`);
+      console.warn(`Store record for ${storeDefinition.name} does not exist`);
       return false;
     }
 
     if (storeRecord.refCount > 1) {
-      this.stores.set(store.name, {
+      this.stores.set(storeDefinition.name, {
         ...storeRecord,
         refCount: storeRecord.refCount - 1,
       });
@@ -71,7 +71,7 @@ class AppsDigestContainer {
       storeRecord.instance.destroy();
     }
 
-    return this.stores.delete(store.name);
+    return this.stores.delete(storeDefinition.name);
   }
 }
 
