@@ -12,8 +12,9 @@ interface AppsDigestValueInterface<V>
 }
 
 class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
-  value: V;
-  subscribers: Map<string, { callback: (value: V) => void }> = new Map();
+  private value: V;
+  private subscribers: Map<string, { callback: (value: V) => void }> =
+    new Map();
 
   constructor(initialValue: V) {
     this.value = initialValue;
