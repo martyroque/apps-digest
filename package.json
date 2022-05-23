@@ -11,6 +11,9 @@
   "engines": {
     "node": ">=12"
   },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "prepare": "tsc",
     "build": "tsc",

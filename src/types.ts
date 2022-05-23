@@ -11,4 +11,4 @@ type AppsDigestStoreDefinition<S extends AppsDigestStoreInterface> = {
   Class: Constructable<S>;
 };
 
-export { AppsDigestStoreInterface, AppsDigestStoreDefinition };
+export { AppsDigestStoreInterface, AppsDigestStoreDefinition, Constructable };
