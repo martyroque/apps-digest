@@ -12,7 +12,9 @@
     "node": ">=12"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "README.md",
+    "apps_digest_flow.jpeg"
   ],
   "scripts": {
     "prepare": "tsc",

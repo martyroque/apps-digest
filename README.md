@@ -1,5 +1,202 @@
 # App's Digest
 
-Simple pub/sub state management
+A simple state management library for JavaScript applications based in the publisher-subscriber and IoC container patterns.
 
-_WIP_
+> Yes, the library name was inspired by the general-interest subscription-based magazine, Reader's Digest.
+
+## Table of contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [A Quick Example](#a-quick-example)
+- [Description](#description)
+- [Detailed Usage](#detailed-usage)
+- [Author](#author)
+- [License](#license)
+
+## Prerequisites
+
+- Node >= 12
+- React >= 16.9.0 (Optional)
+
+## Installation
+
+```sh
+npm install apps-digest
+```
+
+## A quick example
+
+```javascript
+// Counter Store
+import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
+
+class CounterStore {
+  count = new AppsDigestValue(0);
+
+  increment() {
+    const currentCount = this.count.currentValue();
+    this.count.publish(currentCount + 1);
+  }
+}
+
+export default generateStoreDefinition(CounterStore);
+
+// Counter View
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+import CounterStore from './CounterStore';
+
+const CounterView = () => {
+  const counterStore = useAppsDigestStore(CounterStore);
+  const count = useAppsDigestValue(counterStore.count);
+
+  <button onClick={() => counterStore.increment()}>
+    Current Count: {count}
+  </button>;
+};
+
+ReactDOM.render(<CounterView />, document.body);
+```
+
+## Description
+
+App's Digest leverages on two software architecture patterns:
+
+- IoC Container pattern (a.k.a. DI Container) to manage store instantiation, dependency injection and lifecycle.
+- The publisher-subscriber pattern to implement values within the stores that any JavaScript context (including React components) can subscribe and publish to.
+
+![App's Digest Flow](apps_digest_flow.jpeg)
+
+### What's a Store?
+
+A store is essentially a bucket of values that other JavaScript objects can subscribe and publish to. The stores live as long as they have at least one reference in the container. Once the last reference of a store is removed, the store is disposed.
+
+## Detailed Usage
+
+Let's take a closer look on how to use the library.
+
+### Create a store
+
+First, let's create our store. A store is as simple as a class that implements a value and a setter to that value.
+
+Once the store has been created, we need to generate the store definition, which will be used by the container to identify our store in memory.
+
+```javascript
+import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
+
+class CounterStore {
+  count = new AppsDigestValue(0);
+
+  increment() {
+    const currentCount = this.count.currentValue();
+    this.count.publish(currentCount + 1);
+  }
+}
+
+export default generateStoreDefinition(CounterStore);
+```
+
+### Use the store anywhere
+
+Now that we have our store, we can use it anywhere within a JavaScript application by getting its instance via the container.
+
+```javascript
+import { AppsDigestContainer } from 'apps-digest';
+import CounterStore from './CounterStore';
+
+// get the container and store instances
+const storeContainer = AppsDigestContainer.getInstance();
+const counterStore = storeContainer.get(CounterStore);
+
+// subscribe to the value
+const subscriberId = counterStore.count.subscribe((count) => {
+  console.log(`Current Count: ${count}`);
+});
+
+// publish to the value
+counterStore.increment();
+counterStore.increment();
+counterStore.increment();
+
+// unsubscribe from the value
+counterStore.count.unsubscribe(subscriberId);
+
+// dispose the store
+storeContainer.remove(CounterStore);
+```
+
+### Use the store in a React Component
+
+All right, let's use our store in a UI using React (we'll support frameworks in the future).
+
+First we need to get our store instance by using the `useAppsDigestStore`. Then we can use the hook `useAppsDigestValue` to subscribe to the store value and trigger the side effects (render).
+
+By using these hooks, we get automatic value un-subscription and store disposal for free when the component is unmounted.
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+import CounterStore from './CounterStore';
+
+const CounterView = () => {
+  const counterStore = useAppsDigestStore(CounterStore);
+  const count = useAppsDigestValue(counterStore.count);
+
+  <button onClick={() => counterStore.increment()}>
+    Current Count: {count}
+  </button>;
+};
+
+ReactDOM.render(<CounterView />, document.body);
+```
+
+### Store injection (dependency)
+
+It's important for all applications to follow software design principles, specifically separation of concerns and segregation.
+
+With App's Digest, we can have segregated stores that contain a small meaningful portion of the application's state, and then leverage the container to inject stores into main stores.
+
+Let's say we have a store that needs to read the count value from our `CounterStore`. We can easily inject the store like this:
+
+```javascript
+import {
+  AppsDigestValue,
+  AppsDigestStore,
+  generateStoreDefinition,
+} from 'apps-digest';
+import CounterStore from './CounterStore';
+
+class ApplicationStore extends AppsDigestStore {
+  counterStore = this.inject(CounterStore);
+  isMax = new AppsDigestValue(false);
+
+  constructor() {
+    super();
+
+    this.subscribeToStoreValue(this.counterStore.count, (count) => {
+      if (!this.isMax.currentValue() && count >= 10) {
+        this.isMax.publish(true);
+      }
+    });
+  }
+}
+
+export default generateStoreDefinition(ApplicationStore);
+```
+
+By extending from `AppsDigestStore`, we get the automatic un-subscription for free when the store is disposed.
+
+## Author
+
+- **Marty Roque**
+  - GitHub: [@martyroque](https://github.com/martyroque)
+  - Twitter: [@lmproque](https://twitter.com/lmproque)
+
+## License
+
+[ISC License](LICENSE)
+
+Copyright © 2022 [Marty Roque](https://github.com/martyroque).
