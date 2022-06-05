@@ -1,5 +1,6 @@
-interface Constructable<T> {
+interface AppsDigestStoreConstructable<T> {
   new (...args: unknown[]): T;
+  getStoreName(): string;
 }
 
 interface AppsDigestStoreInterface {
@@ -8,7 +9,11 @@ interface AppsDigestStoreInterface {
 
 type AppsDigestStoreDefinition<S extends AppsDigestStoreInterface> = {
   name: string;
-  Class: Constructable<S>;
+  Class: AppsDigestStoreConstructable<S>;
 };
 
-export { AppsDigestStoreInterface, AppsDigestStoreDefinition, Constructable };
+export {
+  AppsDigestStoreInterface,
+  AppsDigestStoreDefinition,
+  AppsDigestStoreConstructable,
+};

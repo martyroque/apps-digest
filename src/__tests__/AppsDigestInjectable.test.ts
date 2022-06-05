@@ -1,5 +1,6 @@
 import { AppsDigestInjectable } from '../AppsDigestInjectable';
 import { AppsDigestContainer } from '../AppsDigestContainer';
+import { generateStoreDefinition } from '../utils';
 
 const storeContainer = AppsDigestContainer.getInstance();
 
@@ -7,19 +8,23 @@ const mockDestroy = jest.fn();
 
 class MockSubStore {
   destroy = mockDestroy;
+
+  public static getStoreName() {
+    return 'MockSubStore';
+  }
 }
+
+const mockSubStoreDefinition = generateStoreDefinition(MockSubStore);
 
 class MockStore extends AppsDigestInjectable {
-  public subStore = this.inject({
-    name: 'MockSubStore',
-    Class: MockSubStore,
-  });
+  public subStore = this.inject(mockSubStoreDefinition);
+
+  public static getStoreName() {
+    return 'MockStore';
+  }
 }
 
-const mockStoreDefinition = {
-  name: 'mockStoreDefinition',
-  Class: MockStore,
-};
+const mockStoreDefinition = generateStoreDefinition(MockStore);
 
 describe('AppsDigestInjectable tests', () => {
   it('should inject a store', () => {

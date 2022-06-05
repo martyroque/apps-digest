@@ -32,6 +32,10 @@ npm install apps-digest
 import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
 
 class CounterStore {
+  static getStoreName() {
+    return "CounterStore";
+  }
+
   count = new AppsDigestValue(0);
 
   increment() {
@@ -79,7 +83,10 @@ Let's take a closer look on how to use the library.
 
 ### Create a store
 
-First, let's create our store. A store is as simple as a class that implements a value and a setter to that value.
+First, let's create our store. A store is a class that implements the following:
+- Static method `getStoreName` that returns the unique store name (required).
+- Store value(s) by instantiating `AppsDigestValue` with an initial value (required).
+- Value setters that publish (updates) the store values (optional).
 
 Once the store has been created, we need to generate the store definition, which will be used by the container to identify our store in memory.
 
@@ -87,6 +94,10 @@ Once the store has been created, we need to generate the store definition, which
 import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
 
 class CounterStore {
+  static getStoreName() {
+    return "CounterStore";
+  }
+
   count = new AppsDigestValue(0);
 
   increment() {
@@ -172,6 +183,10 @@ import CounterStore from './CounterStore';
 class ApplicationStore extends AppsDigestStore {
   counterStore = this.inject(CounterStore);
   isMax = new AppsDigestValue(false);
+
+  static getStoreName() {
+    return "ApplicationStore";
+  }
 
   constructor() {
     super();

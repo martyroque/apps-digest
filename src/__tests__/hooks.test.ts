@@ -1,8 +1,9 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { AppsDigestValue } from '../AppsDigestValue';
 import { useAppsDigestStore, useAppsDigestValue } from '../hooks';
 import { AppsDigestContainer } from '../AppsDigestContainer';
+import { generateStoreDefinition } from '../utils';
 
 const storeContainer = AppsDigestContainer.getInstance();
 
@@ -11,12 +12,12 @@ const mockDestroy = jest.fn();
 class MockStore {
   testValue = new AppsDigestValue(1);
   destroy = mockDestroy;
+  public static getStoreName() {
+    return 'MockStore';
+  }
 }
 
-const mockStoreDefinition = {
-  name: 'mockStoreDefinition',
-  Class: MockStore,
-};
+const mockStoreDefinition = generateStoreDefinition(MockStore);
 
 describe('AppsDigest hooks tests', () => {
   describe('useAppsDigestStore', () => {
@@ -59,7 +60,9 @@ describe('AppsDigest hooks tests', () => {
     it('should subscribe to the value', () => {
       const { result } = renderHook(() => useAppsDigestValue(store.testValue));
 
-      store.testValue.publish(2);
+      act(() => {
+        store.testValue.publish(2);
+      });
 
       expect(result.current).toBe(2);
     });
@@ -69,11 +72,15 @@ describe('AppsDigest hooks tests', () => {
         useAppsDigestValue(store.testValue),
       );
 
-      store.testValue.publish(2);
+      act(() => {
+        store.testValue.publish(2);
+      });
 
       unmount();
 
-      store.testValue.publish(3);
+      act(() => {
+        store.testValue.publish(3);
+      });
 
       expect(result.current).toBe(2);
     });

@@ -1,10 +1,17 @@
 import { AppsDigestContainer } from '../AppsDigestContainer';
+import { generateStoreDefinition } from '../utils';
 
 const mockDestroy = jest.fn();
 
 class MockStore {
   destroy = mockDestroy;
+
+  public static getStoreName() {
+    return 'MockStore';
+  }
 }
+
+const mockStoreDefinition = generateStoreDefinition(MockStore);
 
 const storeContainer = AppsDigestContainer.getInstance();
 
@@ -13,12 +20,11 @@ describe('AppsDigestContainer tests', () => {
     jest.clearAllMocks();
   });
 
-  describe('get store', () => {
-    const mockStoreDefinition = {
-      name: 'mockStoreDefinition',
-      Class: MockStore,
-    };
+  afterEach(() => {
+    storeContainer.remove(mockStoreDefinition);
+  });
 
+  describe('get store', () => {
     it('should return the store instance', () => {
       const store = storeContainer.get(mockStoreDefinition);
 
@@ -27,39 +33,29 @@ describe('AppsDigestContainer tests', () => {
   });
 
   describe('remove store', () => {
-    const mockRemoveStoreDefinition = {
-      name: 'mockRemoveStoreDefinition',
-      Class: MockStore,
-    };
-
     it('should return false when store record was not found', () => {
-      expect(
-        storeContainer.remove({
-          name: 'notFound',
-          Class: jest.fn(),
-        }),
-      ).toBe(false);
+      expect(storeContainer.remove(mockStoreDefinition)).toBe(false);
     });
 
     it('should return true when store record was found', () => {
-      storeContainer.get(mockRemoveStoreDefinition);
+      storeContainer.get(mockStoreDefinition);
 
-      expect(storeContainer.remove(mockRemoveStoreDefinition)).toBe(true);
+      expect(storeContainer.remove(mockStoreDefinition)).toBe(true);
     });
 
     it('should call destroy the store instance when store has only 1 reference', () => {
-      storeContainer.get(mockRemoveStoreDefinition);
+      storeContainer.get(mockStoreDefinition);
 
-      storeContainer.remove(mockRemoveStoreDefinition);
+      storeContainer.remove(mockStoreDefinition);
 
       expect(mockDestroy).toHaveBeenCalledTimes(1);
     });
 
     it('should not destroy the store instance when store has more than 1 reference', () => {
-      storeContainer.get(mockRemoveStoreDefinition);
-      storeContainer.get(mockRemoveStoreDefinition);
+      storeContainer.get(mockStoreDefinition);
+      storeContainer.get(mockStoreDefinition);
 
-      storeContainer.remove(mockRemoveStoreDefinition);
+      storeContainer.remove(mockStoreDefinition);
 
       expect(mockDestroy).not.toHaveBeenCalled();
     });
