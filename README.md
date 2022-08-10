@@ -4,6 +4,8 @@ A simple state management library for JavaScript applications based in the publi
 
 > Yes, the library name was inspired by the general-interest subscription-based magazine, Reader's Digest.
 
+[![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&amp;utm_medium=badge&amp;utm_campaign=rate-badge)
+
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
