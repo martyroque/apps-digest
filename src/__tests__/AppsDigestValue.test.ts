@@ -14,6 +14,10 @@ beforeAll(() => {
 });
 
 describe('AppsDigestValue tests', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('currentValue tests', () => {
     it('should get the current value', () => {
       const initialValue = 'test value';
@@ -34,6 +38,41 @@ describe('AppsDigestValue tests', () => {
       const value = new AppsDigestValue('');
 
       expect(value.publish('test')).toBe(true);
+    });
+
+    describe('persistency tests', () => {
+      it('should persist the new value if persist key is defined', () => {
+        const expectedValue = 'initial value';
+        const persistedKey = 'persisted_key';
+        const value = new AppsDigestValue(expectedValue, persistedKey);
+
+        value.publish('test');
+
+        expect(localStorage.setItem).toHaveBeenCalledWith(
+          persistedKey,
+          JSON.stringify(expectedValue),
+        );
+      });
+
+      it('should not persist the new value if persist key is defined and value has not changed', () => {
+        const persistedKey = 'persisted_key';
+        const value = new AppsDigestValue(2, persistedKey);
+        (localStorage.setItem as jest.Mock).mockClear();
+
+        value.publish(2);
+
+        expect(localStorage.setItem).not.toHaveBeenCalled();
+      });
+
+      it('should not persist the new value if persist key is defined and value is undefined', () => {
+        const persistedKey = 'persisted_key';
+        const value = new AppsDigestValue<number | undefined>(2, persistedKey);
+        (localStorage.setItem as jest.Mock).mockClear();
+
+        value.publish(undefined);
+
+        expect(localStorage.setItem).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -68,6 +107,35 @@ describe('AppsDigestValue tests', () => {
       const subId = value.subscribe(() => undefined);
 
       expect(value.unsubscribe(subId)).toBe(true);
+    });
+  });
+
+  describe('persistency tests', () => {
+    it('should hydrate persisted value when persisted value exists', () => {
+      const expectedValue = [1, 2, 3];
+      const persistedKey = 'persisted_key';
+      (localStorage.getItem as jest.Mock).mockReturnValue(
+        JSON.stringify(expectedValue),
+      );
+
+      const value = new AppsDigestValue(null, persistedKey);
+
+      expect(localStorage.getItem).toHaveBeenCalledWith(persistedKey);
+      expect(value.currentValue()).toEqual(expectedValue);
+    });
+
+    it('should create new persisted value when persisted value does not exist', () => {
+      const expectedValue = false;
+      const persistedKey = 'persisted_key';
+      (localStorage.getItem as jest.Mock).mockReturnValue(undefined);
+
+      const value = new AppsDigestValue(expectedValue, persistedKey);
+
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        persistedKey,
+        JSON.stringify(expectedValue),
+      );
+      expect(value.currentValue()).toEqual(expectedValue);
     });
   });
 });

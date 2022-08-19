@@ -18,9 +18,30 @@ type Subscriber<V> = {
 class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
   private value: V;
   private subscribers: Map<string, Subscriber<V>> = new Map();
+  private persistKey?: string;
 
-  constructor(initialValue: V) {
-    this.value = initialValue;
+  constructor(initialValue: V, persistKey?: string) {
+    let value = initialValue;
+
+    if (persistKey) {
+      this.persistKey = persistKey;
+      const rawPersistedValue = localStorage.getItem(persistKey);
+      if (rawPersistedValue) {
+        try {
+          value = JSON.parse(rawPersistedValue);
+        } catch (error) {
+          console.warn(
+            `Could not parse value ${rawPersistedValue} for ${persistKey}. Error:`,
+            error,
+          );
+        }
+      } else {
+        localStorage.setItem(persistKey, JSON.stringify(initialValue));
+      }
+    }
+
+    this.value = value;
+
     this.currentValue = this.currentValue.bind(this);
     this.publish = this.publish.bind(this);
     this.subscribe = this.subscribe.bind(this);
@@ -37,6 +58,10 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
     }
 
     this.value = newValue;
+
+    if (newValue !== undefined && this.persistKey) {
+      localStorage.setItem(this.persistKey, JSON.stringify(newValue));
+    }
 
     for (const [, subscriber] of this.subscribers) {
       subscriber.callback(this.value);

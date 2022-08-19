@@ -13,6 +13,7 @@ A simple state management library for JavaScript applications based in the publi
 - [A Quick Example](#a-quick-example)
 - [Description](#description)
 - [Detailed Usage](#detailed-usage)
+- [Persistency](#persistency)
 - [Author](#author)
 - [License](#license)
 
@@ -205,6 +206,20 @@ export default generateStoreDefinition(ApplicationStore);
 ```
 
 By extending from `AppsDigestStore`, we get the automatic un-subscription for free when the store is disposed.
+
+## Persistency
+
+In order to persist a store value, we need to specify the persist key we would like to use (has to be unique) in the second argument of `AppsDigestValue`.
+
+Every time the value is published, the value will be persisted. And, the next time the store is instantiated, the value will be rehydrated.
+
+```javascript
+  // assuming CountValue was persisted as 2, count will be hydrated with 2 instead of 0
+  count = new AppsDigestValue(0, 'CountValue');
+
+  // this will persist the new value
+  this.count.publish(currentCount + 1);
+```
 
 ## Author
 
