@@ -7,6 +7,8 @@ const storeContainer = AppsDigestContainer.getInstance();
 
 class MockSubStore {
   testValue = new AppsDigestValue(1);
+  boolValue = new AppsDigestValue(false);
+  stringValue = new AppsDigestValue<string | undefined>(undefined);
 
   public static getStoreName() {
     return 'MockSubStore';
@@ -19,6 +21,13 @@ const mockSubscribeCallback = jest.fn();
 
 class MockStore extends AppsDigestStore {
   public subStore = this.inject(mockSubStoreDefinition);
+
+  public computed = this.computedValue(
+    [this.subStore.boolValue, this.subStore.stringValue],
+    (boolValue, stringValue) => {
+      return boolValue && stringValue === 'TEST';
+    },
+  );
 
   constructor() {
     super();
@@ -33,29 +42,56 @@ class MockStore extends AppsDigestStore {
 const mockStoreDefinition = generateStoreDefinition(MockStore);
 
 describe('AppsDigestStore tests', () => {
+  let mockStore: MockStore;
+  let mockSubStore: MockSubStore;
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStore = storeContainer.get(mockStoreDefinition);
+    mockSubStore = storeContainer.get(mockSubStoreDefinition);
   });
 
-  it('should subscribe to any store value', () => {
-    storeContainer.get(mockStoreDefinition);
-    const mockSubStore = storeContainer.get(mockSubStoreDefinition);
-
-    mockSubStore.testValue.publish(2);
-
-    expect(mockSubscribeCallback).toHaveBeenCalledWith(2);
-
+  afterEach(() => {
     storeContainer.remove(mockStoreDefinition);
   });
 
-  it('should unsubscribe from all values when main store is removed', () => {
-    storeContainer.get(mockStoreDefinition);
-    const mockSubStore = storeContainer.get(mockSubStoreDefinition);
+  describe('subscribeToStoreValue', () => {
+    it('should subscribe to any store value', () => {
+      mockSubStore.testValue.publish(2);
 
-    storeContainer.remove(mockStoreDefinition);
+      expect(mockSubscribeCallback).toHaveBeenCalledWith(2);
+    });
 
-    mockSubStore.testValue.publish(2);
+    it('should unsubscribe from all values when main store is removed', () => {
+      storeContainer.remove(mockStoreDefinition);
 
-    expect(mockSubscribeCallback).not.toHaveBeenCalled();
+      mockSubStore.testValue.publish(2);
+
+      expect(mockSubscribeCallback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('computedValue', () => {
+    it('should return initial computed value', () => {
+      expect(mockStore.computed.currentValue()).toBe(false);
+    });
+
+    it('should return updated computed value', () => {
+      mockSubStore.boolValue.publish(true);
+      mockSubStore.stringValue.publish('TEST');
+
+      expect(mockStore.computed.currentValue()).toBe(true);
+    });
+
+    it('should not update computed value when main store is removed', () => {
+      mockSubStore.boolValue.publish(false);
+      mockSubStore.stringValue.publish(undefined);
+
+      storeContainer.remove(mockStoreDefinition);
+
+      mockSubStore.boolValue.publish(true);
+      mockSubStore.stringValue.publish('TEST');
+
+      expect(mockStore.computed.currentValue()).toBe(false);
+    });
   });
 });

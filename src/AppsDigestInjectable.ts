@@ -1,11 +1,9 @@
 import { AppsDigestContainer } from './AppsDigestContainer';
-import { AppsDigestStoreInterface, AppsDigestStoreDefinition } from './types';
+import { AppsDigestStoreDefinition } from './types';
 
 abstract class AppsDigestInjectable {
-  private injectedStores: Map<
-    string,
-    AppsDigestStoreDefinition<AppsDigestStoreInterface>
-  > = new Map();
+  private injectedStores: Map<string, AppsDigestStoreDefinition<unknown>> =
+    new Map();
   private storeContainer = AppsDigestContainer.getInstance();
 
   protected inject<S>(storeDefinition: AppsDigestStoreDefinition<S>): S {

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.0.4] - 2022-09-04
+
+### Added
+
+- Added computed values.
+
+### Changed
+
+- Fix store definition constraints to comply with [TypeScript 4.8](https://devblogs.microsoft.com/typescript/announcing-typescript-4-8/#unconstrained-generics-no-longer-assignable-to).
+
 ## [0.0.3] - 2022-08-18
 
 ### Added

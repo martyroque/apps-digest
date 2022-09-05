@@ -14,6 +14,7 @@ A simple state management library for JavaScript applications based in the publi
 - [Description](#description)
 - [Detailed Usage](#detailed-usage)
 - [Persistency](#persistency)
+- [Computed Values](#computed-values)
 - [Author](#author)
 - [License](#license)
 
@@ -219,6 +220,80 @@ Every time the value is published, the value will be persisted. And, the next ti
 
   // this will persist the new value
   this.count.publish(currentCount + 1);
+```
+
+## Computed Values
+
+Sometimes we have complex stores with several values that we then need to use to derive a value from. App's Digest offers computed values feature, which allows us to consume store values, compute them in a callback and produce a single result. To do so, we need our store to extend from `AppsDigestStore`.
+
+Let's say we have a store that manages the user session, and we have a `isAuth` value to determine if the user is authenticated. Now, let's say our user store depends on the API store, which has a value `isConnected` to allow API requests. Given a requirement that we should only allow requests from authenticated users when the API is connected, we can create a computed property called `shouldMakeRequest`, like so:
+
+### ApiStore
+
+```javascript
+import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
+
+class ApiStore {
+  static getStoreName() {
+    return "ApiStore";
+  }
+
+  isConnected = new AppsDigestValue(false);
+}
+
+export default generateStoreDefinition(ApiStore);
+```
+
+### UserStore
+
+```javascript
+import {
+  AppsDigestValue,
+  AppsDigestStore,
+  generateStoreDefinition,
+} from 'apps-digest';
+import ApiStore from './ApiStore';
+
+class UserStore extends AppsDigestStore {
+  static getStoreName() {
+    return "UserStore";
+  }
+  
+  apiStore = this.inject(ApiStore);
+  isAuth = new AppsDigestValue(false);
+  shouldMakeRequest = this.computedValue(
+    [this.isAuth, this.apiStore.isConnected],
+    (isAuthValue, isConnectedValue) => {
+      return isAuthValue && isConnectedValue;
+    },
+  );
+}
+
+export default generateStoreDefinition(UserStore);
+```
+
+With this, `shouldMakeRequest` will track both `isAuth` and `isConnected` values and produce a single `boolean` value as a result. This computed value can be used as a regular store value anywhere in our app.
+
+```javascript
+import React, {useEffect} from 'react';
+import ReactDOM from 'react-dom';
+import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+import UserStore from './UserStore';
+
+const App = () => {
+  const userStore = useAppsDigestStore(UserStore);
+  const shouldMakeRequest = useAppsDigestValue(userStore.shouldMakeRequest);
+
+  useEffect(() => {
+    if (shouldMakeRequest) {
+      // make a fetch request
+    }
+  }, [shouldMakeRequest]);
+
+  // ...
+};
+
+ReactDOM.render(<App />, document.body);
 ```
 
 ## Author
