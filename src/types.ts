@@ -1,13 +1,13 @@
-interface AppsDigestStoreConstructable<T> {
-  new (...args: unknown[]): T;
-  getStoreName(): string;
-}
-
 interface AppsDigestStoreInterface {
   destroy?: () => void;
 }
 
-type AppsDigestStoreDefinition<S extends AppsDigestStoreInterface> = {
+interface AppsDigestStoreConstructable<T> {
+  new (...args: unknown[]): T & AppsDigestStoreInterface;
+  getStoreName(): string;
+}
+
+type AppsDigestStoreDefinition<S> = {
   name: string;
   Class: AppsDigestStoreConstructable<S>;
 };
