@@ -1,8 +1,8 @@
 # App's Digest
 
-A simple state management library for JavaScript applications based in the publisher-subscriber and IoC container patterns.
+A simple state management library for JavaScript applications based on the publisher-subscriber and IoC container patterns.
 
-> Yes, the library name was inspired by the general-interest subscription-based magazine, Reader's Digest.
+> The library name was inspired by the general-interest subscription-based magazine, Reader's Digest.
 
 [![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&amp;utm_medium=badge&amp;utm_campaign=rate-badge)
 
@@ -13,6 +13,7 @@ A simple state management library for JavaScript applications based in the publi
 - [A Quick Example](#a-quick-example)
 - [Description](#description)
 - [Detailed Usage](#detailed-usage)
+- [Dependency](#dependency-injection)
 - [Persistency](#persistency)
 - [Computed Values](#computed-values)
 - [Author](#author)
@@ -60,9 +61,11 @@ const CounterView = () => {
   const counterStore = useAppsDigestStore(CounterStore);
   const count = useAppsDigestValue(counterStore.count);
 
-  <button onClick={() => counterStore.increment()}>
-    Current Count: {count}
-  </button>;
+  return (
+    <button onClick={() => counterStore.increment()}>
+      Current Count: {count}
+    </button>
+  );
 };
 
 ReactDOM.render(<CounterView />, document.body);
@@ -75,7 +78,7 @@ App's Digest leverages on two software architecture patterns:
 - IoC Container pattern (a.k.a. DI Container) to manage store instantiation, dependency injection and lifecycle.
 - The publisher-subscriber pattern to implement values within the stores that any JavaScript context (including React components) can subscribe and publish to.
 
-![App's Digest Flow](apps_digest_flow.jpeg)
+![App's Digest Flow](https://raw.githubusercontent.com/martyroque/emrock-blog/22a90734b18b9642bd4012c11ced3dbf7ea6db98/public/images/apps_digest_flow.jpeg)
 
 ### What's a Store?
 
@@ -160,15 +163,21 @@ const CounterView = () => {
   const counterStore = useAppsDigestStore(CounterStore);
   const count = useAppsDigestValue(counterStore.count);
 
-  <button onClick={() => counterStore.increment()}>
-    Current Count: {count}
-  </button>;
+  return (
+    <button onClick={() => counterStore.increment()}>
+      Current Count: {count}
+    </button>
+  );
 };
 
 ReactDOM.render(<CounterView />, document.body);
 ```
 
-### Store injection (dependency)
+### See this live
+
+Please visit our [App's Digest Codesandbox](https://codesandbox.io/s/apps-digest-tutorial-0cwlqq?file=/src/App.js) to see a live example of the React usage.
+
+## Dependency (injection)
 
 It's important for all applications to follow software design principles, specifically separation of concerns and segregation.
 

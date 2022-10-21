@@ -1,6 +1,6 @@
 {
   "name": "apps-digest",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Simple pub/sub state management",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,8 +14,7 @@
   "files": [
     "dist/",
     "README.md",
-    "CHANGELOG.md",
-    "apps_digest_flow.jpeg"
+    "CHANGELOG.md"
   ],
   "scripts": {
     "prepare": "tsc",

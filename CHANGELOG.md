@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.0.5] - 2022-10-21
+
+### Changed
+
+- Fixed README examples and added a live demo.
+- Removed the `apps_digest_flow.jpeg` image to reduce package size.
+
 ## [0.0.4] - 2022-09-04
 
 ### Added
