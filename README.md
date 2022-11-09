@@ -1,10 +1,20 @@
 # App's Digest
 
-A simple state management library for JavaScript applications based on the publisher-subscriber and IoC container patterns.
+_Simple, atomic state management._
+
+[![npm version](https://badge.fury.io/js/apps-digest.svg)](https://badge.fury.io/js/apps-digest) [![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&amp;utm_medium=badge&amp;utm_campaign=rate-badge)
+
+---
+
+## Introduction
+
+App's Digest is a simple, atomic state management library based on the publisher-subscriber pattern and inversion-of-control (IoC) container design principle.
+
+App's Digest allows you to have centralized locations (stores) with units of state (atoms) that your application can subscribe to. Unlike other state management libraries, App's Digest only triggers strictly-needed, isolated updates for computations (e.g. React components) subscribed to atoms.
+
+With App's Digest you can manage your application state outside of any UI framework, making your code decoupled, portable, and testable.
 
 > The library name was inspired by the general-interest subscription-based magazine, Reader's Digest.
-
-[![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&amp;utm_medium=badge&amp;utm_campaign=rate-badge)
 
 ## Table of contents
 
