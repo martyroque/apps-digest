@@ -5,10 +5,6 @@ const mockDestroy = jest.fn();
 
 class MockStore {
   destroy = mockDestroy;
-
-  public static getStoreName() {
-    return 'MockStore';
-  }
 }
 
 const mockStoreDefinition = generateStoreDefinition(MockStore);

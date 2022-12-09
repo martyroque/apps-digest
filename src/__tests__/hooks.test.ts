@@ -1,20 +1,14 @@
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { AppsDigestValue } from '../AppsDigestValue';
-import { useAppsDigestStore, useAppsDigestValue } from '../hooks';
-import { AppsDigestContainer } from '../AppsDigestContainer';
 import { generateStoreDefinition } from '../utils';
-
-const storeContainer = AppsDigestContainer.getInstance();
+import { useAppsDigestStore, useAppsDigestValue } from '../hooks';
 
 const mockDestroy = jest.fn();
 
 class MockStore {
   testValue = new AppsDigestValue(1);
   destroy = mockDestroy;
-  public static getStoreName() {
-    return 'MockStore';
-  }
 }
 
 const mockStoreDefinition = generateStoreDefinition(MockStore);
@@ -30,9 +24,14 @@ describe('AppsDigest hooks tests', () => {
     });
 
     it('should remove the store instance', () => {
-      const { unmount } = renderHook(() =>
+      const { unmount, rerender } = renderHook(() =>
         useAppsDigestStore(mockStoreDefinition),
       );
+
+      // trigger some rerenders to ensure a single store reference
+      rerender();
+      rerender();
+      rerender();
 
       unmount();
 
@@ -44,11 +43,10 @@ describe('AppsDigest hooks tests', () => {
     let store: MockStore;
 
     beforeEach(() => {
-      store = storeContainer.get(mockStoreDefinition);
-    });
-
-    afterEach(() => {
-      storeContainer.remove(mockStoreDefinition);
+      const { result } = renderHook(() =>
+        useAppsDigestStore(mockStoreDefinition),
+      );
+      store = result.current;
     });
 
     it('should return the initial value', () => {
@@ -68,13 +66,18 @@ describe('AppsDigest hooks tests', () => {
     });
 
     it('should unsubscribe from the value when unmounted', () => {
-      const { result, unmount } = renderHook(() =>
+      const { result, unmount, rerender } = renderHook(() =>
         useAppsDigestValue(store.testValue),
       );
 
       act(() => {
         store.testValue.publish(2);
       });
+
+      // trigger some rerenders to ensure a single subscription
+      rerender();
+      rerender();
+      rerender();
 
       unmount();
 

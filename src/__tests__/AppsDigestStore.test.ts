@@ -9,10 +9,6 @@ class MockSubStore {
   testValue = new AppsDigestValue(1);
   boolValue = new AppsDigestValue(false);
   stringValue = new AppsDigestValue<string | undefined>(undefined);
-
-  public static getStoreName() {
-    return 'MockSubStore';
-  }
 }
 
 const mockSubStoreDefinition = generateStoreDefinition(MockSubStore);
@@ -32,10 +28,6 @@ class MockStore extends AppsDigestStore {
   constructor() {
     super();
     this.subscribeToStoreValue(this.subStore.testValue, mockSubscribeCallback);
-  }
-
-  public static getStoreName() {
-    return 'MockStore';
   }
 }
 
