@@ -7,7 +7,7 @@ abstract class AppsDigestInjectable {
   private storeContainer = AppsDigestContainer.getInstance();
 
   protected inject<S>(storeDefinition: AppsDigestStoreDefinition<S>): S {
-    this.injectedStores.set(storeDefinition.name, storeDefinition);
+    this.injectedStores.set(storeDefinition.storeId, storeDefinition);
 
     return this.storeContainer.get(storeDefinition);
   }

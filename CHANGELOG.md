@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.0] - 2022-12-09
+
+### Changed
+
+- Update custom hooks to consume `useSyncExternalStore`.
+- Generate unique store IDs upon store generation instead of the static `getStoreName` method, which could be prone to issues on refactors.
+
 ## [0.0.5] - 2022-10-21
 
 ### Changed

@@ -16,6 +16,13 @@ With App's Digest you can manage your application state outside of any UI framew
 
 > The library name was inspired by the general-interest subscription-based magazine, Reader's Digest.
 
+## Why App's Digest over other state management libraries?
+
+- Simple and un-opinionated
+- Makes hooks the primary means of consuming state
+- Less boilerplate and no provider wrapping
+- Centralized, atomic and subscription-based state management
+
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
@@ -47,10 +54,6 @@ npm install apps-digest
 import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
 
 class CounterStore {
-  static getStoreName() {
-    return "CounterStore";
-  }
-
   count = new AppsDigestValue(0);
 
   increment() {
@@ -101,7 +104,6 @@ Let's take a closer look on how to use the library.
 ### Create a store
 
 First, let's create our store. A store is a class that implements the following:
-- Static method `getStoreName` that returns the unique store name (required).
 - Store value(s) by instantiating `AppsDigestValue` with an initial value (required).
 - Value setters that publish (updates) the store values (optional).
 
@@ -111,10 +113,6 @@ Once the store has been created, we need to generate the store definition, which
 import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
 
 class CounterStore {
-  static getStoreName() {
-    return "CounterStore";
-  }
-
   count = new AppsDigestValue(0);
 
   increment() {
@@ -207,10 +205,6 @@ class ApplicationStore extends AppsDigestStore {
   counterStore = this.inject(CounterStore);
   isMax = new AppsDigestValue(false);
 
-  static getStoreName() {
-    return "ApplicationStore";
-  }
-
   constructor() {
     super();
 
@@ -253,10 +247,6 @@ Let's say we have a store that manages the user session, and we have a `isAuth` 
 import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
 
 class ApiStore {
-  static getStoreName() {
-    return "ApiStore";
-  }
-
   isConnected = new AppsDigestValue(false);
 }
 
@@ -274,10 +264,6 @@ import {
 import ApiStore from './ApiStore';
 
 class UserStore extends AppsDigestStore {
-  static getStoreName() {
-    return "UserStore";
-  }
-  
   apiStore = this.inject(ApiStore);
   isAuth = new AppsDigestValue(false);
   shouldMakeRequest = this.computedValue(

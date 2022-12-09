@@ -4,12 +4,11 @@ interface AppsDigestStoreInterface {
 
 interface AppsDigestStoreConstructable<T> {
   new (...args: unknown[]): T & AppsDigestStoreInterface;
-  getStoreName(): string;
 }
 
 type AppsDigestStoreDefinition<S> = {
-  name: string;
-  Class: AppsDigestStoreConstructable<S>;
+  storeId: string;
+  storeClass: AppsDigestStoreConstructable<S>;
 };
 
 export {

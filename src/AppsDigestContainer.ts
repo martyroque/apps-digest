@@ -20,13 +20,15 @@ class AppsDigestContainer {
   }
 
   private instantiate<S>(storeDefinition: AppsDigestStoreDefinition<S>) {
-    if (this.stores.has(storeDefinition.name)) {
-      console.warn(`Store record for ${storeDefinition.name} already exists`);
+    if (this.stores.has(storeDefinition.storeId)) {
+      console.warn(
+        `Store record for ${storeDefinition.storeId} already exists`,
+      );
       return;
     }
 
-    this.stores.set(storeDefinition.name, {
-      instance: new storeDefinition.Class(),
+    this.stores.set(storeDefinition.storeId, {
+      instance: new storeDefinition.storeClass(),
       refCount: 0,
     });
   }
@@ -36,13 +38,13 @@ class AppsDigestContainer {
   }
 
   public get<S>(storeDefinition: AppsDigestStoreDefinition<S>): S {
-    if (!this.stores.has(storeDefinition.name)) {
+    if (!this.stores.has(storeDefinition.storeId)) {
       this.instantiate(storeDefinition);
     }
 
-    const storeRecord = this.stores.get(storeDefinition.name) as StoreRecord;
+    const storeRecord = this.stores.get(storeDefinition.storeId) as StoreRecord;
 
-    this.stores.set(storeDefinition.name, {
+    this.stores.set(storeDefinition.storeId, {
       ...storeRecord,
       refCount: storeRecord.refCount + 1,
     });
@@ -51,15 +53,17 @@ class AppsDigestContainer {
   }
 
   public remove<S>(storeDefinition: AppsDigestStoreDefinition<S>) {
-    const storeRecord = this.stores.get(storeDefinition.name);
+    const storeRecord = this.stores.get(storeDefinition.storeId);
 
     if (!storeRecord) {
-      console.warn(`Store record for ${storeDefinition.name} does not exist`);
+      console.warn(
+        `Store record for ${storeDefinition.storeId} does not exist`,
+      );
       return false;
     }
 
     if (storeRecord.refCount > 1) {
-      this.stores.set(storeDefinition.name, {
+      this.stores.set(storeDefinition.storeId, {
         ...storeRecord,
         refCount: storeRecord.refCount - 1,
       });
@@ -71,7 +75,7 @@ class AppsDigestContainer {
       storeRecord.instance.destroy();
     }
 
-    return this.stores.delete(storeDefinition.name);
+    return this.stores.delete(storeDefinition.storeId);
   }
 }
 

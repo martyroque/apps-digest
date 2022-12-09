@@ -1,44 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useSyncExternalStore } from 'use-sync-external-store/shim';
 
 import { AppsDigestStoreDefinition } from './types';
 import { AppsDigestContainer } from './AppsDigestContainer';
 import { AppsDigestReadOnlyValueInterface } from './AppsDigestValue';
 
-function useOnce(once: () => void) {
-  return useEffect(once, []);
-}
-
 function useAppsDigestStore<S>(
   storeDefinition: AppsDigestStoreDefinition<S>,
 ): S {
   const appsDigestContainer = AppsDigestContainer.getInstance();
-  const storeInstance = useState(() =>
-    appsDigestContainer.get(storeDefinition),
-  )[0];
 
-  useOnce(() => {
-    return () => {
-      appsDigestContainer.remove(storeDefinition);
-    };
-  });
+  const [getStore, cleanup] = useMemo(() => {
+    const store = appsDigestContainer.get(storeDefinition);
+    return [
+      () => store,
+      () => {
+        return () => {
+          appsDigestContainer.remove(storeDefinition);
+        };
+      },
+    ];
+  }, []);
 
-  return storeInstance;
+  return useSyncExternalStore(cleanup, getStore);
 }
 
 function useAppsDigestValue<V>(
   storeValue: AppsDigestReadOnlyValueInterface<V>,
 ): V {
-  const [value, setValue] = useState(storeValue.currentValue());
-
-  useOnce(() => {
-    const subId = storeValue.subscribe(setValue);
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    const subId = storeValue.subscribe(onStoreChange);
 
     return () => {
       storeValue.unsubscribe(subId);
     };
-  });
+  }, []);
 
-  return value;
+  return useSyncExternalStore(subscribe, storeValue.currentValue);
 }
 
 export { useAppsDigestStore, useAppsDigestValue };

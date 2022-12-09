@@ -1,19 +1,23 @@
+import { nanoid } from 'nanoid';
+
 import { generateStoreDefinition } from '../utils';
+
+jest.mock('nanoid');
+
+const mockStoreId = 'QAqQDsM9iwcMnZl7TyAnv';
+jest.mocked(nanoid).mockReturnValue(mockStoreId);
 
 describe('utils tests', () => {
   describe('generateStoreDefinition', () => {
     it('should generate a store definition', () => {
-      const expectedStoreName = 'MockStore';
       class MockStore {
-        public static getStoreName() {
-          return expectedStoreName;
-        }
+        destroy = jest.fn();
       }
       const storeDefinition = generateStoreDefinition(MockStore);
 
       expect(storeDefinition).toEqual({
-        name: expectedStoreName,
-        Class: MockStore,
+        storeId: mockStoreId,
+        storeClass: MockStore,
       });
     });
   });

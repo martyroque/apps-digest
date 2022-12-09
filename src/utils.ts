@@ -1,3 +1,5 @@
+import { nanoid } from 'nanoid';
+
 import {
   AppsDigestStoreDefinition,
   AppsDigestStoreConstructable,
@@ -7,8 +9,8 @@ function generateStoreDefinition<S>(
   storeClass: AppsDigestStoreConstructable<S>,
 ): AppsDigestStoreDefinition<S> {
   return {
-    name: storeClass.getStoreName(),
-    Class: storeClass,
+    storeId: nanoid(),
+    storeClass,
   };
 }
 

@@ -8,20 +8,12 @@ const mockDestroy = jest.fn();
 
 class MockSubStore {
   destroy = mockDestroy;
-
-  public static getStoreName() {
-    return 'MockSubStore';
-  }
 }
 
 const mockSubStoreDefinition = generateStoreDefinition(MockSubStore);
 
 class MockStore extends AppsDigestInjectable {
   public subStore = this.inject(mockSubStoreDefinition);
-
-  public static getStoreName() {
-    return 'MockStore';
-  }
 }
 
 const mockStoreDefinition = generateStoreDefinition(MockStore);

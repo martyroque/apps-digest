@@ -1,21 +1,18 @@
 import { nanoid } from 'nanoid';
 import { AppsDigestValue } from '../AppsDigestValue';
 
-jest.mock('nanoid', () => {
-  return {
-    ...jest.requireActual('nanoid'),
-    nanoid: jest.fn(),
-  };
-});
+jest.mock('nanoid');
 
-const mockSubId = '0833ddfb047128aac74ab3e7fcde25297b2b96b5';
-beforeAll(() => {
-  (nanoid as jest.Mock).mockReturnValue(mockSubId);
-});
+const mockSubId = 'DYyib2HcqrjvrUm2k6ssU';
+jest.mocked(nanoid).mockReturnValue(mockSubId);
+
+const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+const getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
 
 describe('AppsDigestValue tests', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   describe('currentValue tests', () => {
@@ -40,7 +37,7 @@ describe('AppsDigestValue tests', () => {
       expect(value.publish('test')).toBe(true);
     });
 
-    describe('persistency tests', () => {
+    describe('persistency on publish tests', () => {
       it('should persist the new value if persist key is defined', () => {
         const expectedValue = 'initial value';
         const persistedKey = 'persisted_key';
@@ -48,30 +45,38 @@ describe('AppsDigestValue tests', () => {
 
         value.publish('test');
 
-        expect(localStorage.setItem).toHaveBeenCalledWith(
+        expect(setItemSpy).toHaveBeenCalledWith(
           persistedKey,
           JSON.stringify(expectedValue),
         );
       });
 
+      it('should not persist the new value if persist key is not defined', () => {
+        const value = new AppsDigestValue<number>(2);
+
+        value.publish(3);
+
+        expect(setItemSpy).not.toHaveBeenCalled();
+      });
+
       it('should not persist the new value if persist key is defined and value has not changed', () => {
         const persistedKey = 'persisted_key';
         const value = new AppsDigestValue(2, persistedKey);
-        (localStorage.setItem as jest.Mock).mockClear();
+        setItemSpy.mockClear();
 
         value.publish(2);
 
-        expect(localStorage.setItem).not.toHaveBeenCalled();
+        expect(setItemSpy).not.toHaveBeenCalled();
       });
 
       it('should not persist the new value if persist key is defined and value is undefined', () => {
         const persistedKey = 'persisted_key';
         const value = new AppsDigestValue<number | undefined>(2, persistedKey);
-        (localStorage.setItem as jest.Mock).mockClear();
+        setItemSpy.mockClear();
 
         value.publish(undefined);
 
-        expect(localStorage.setItem).not.toHaveBeenCalled();
+        expect(setItemSpy).not.toHaveBeenCalled();
       });
     });
   });
@@ -114,28 +119,31 @@ describe('AppsDigestValue tests', () => {
     it('should hydrate persisted value when persisted value exists', () => {
       const expectedValue = [1, 2, 3];
       const persistedKey = 'persisted_key';
-      (localStorage.getItem as jest.Mock).mockReturnValue(
-        JSON.stringify(expectedValue),
-      );
+      new AppsDigestValue(expectedValue, persistedKey);
 
       const value = new AppsDigestValue(null, persistedKey);
 
-      expect(localStorage.getItem).toHaveBeenCalledWith(persistedKey);
+      expect(getItemSpy).toHaveBeenCalledWith(persistedKey);
       expect(value.currentValue()).toEqual(expectedValue);
     });
 
     it('should create new persisted value when persisted value does not exist', () => {
       const expectedValue = false;
       const persistedKey = 'persisted_key';
-      (localStorage.getItem as jest.Mock).mockReturnValue(undefined);
 
       const value = new AppsDigestValue(expectedValue, persistedKey);
 
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(setItemSpy).toHaveBeenCalledWith(
         persistedKey,
         JSON.stringify(expectedValue),
       );
       expect(value.currentValue()).toEqual(expectedValue);
+    });
+
+    it('should not create new persisted value when persisted key is not defined', () => {
+      new AppsDigestValue(false);
+
+      expect(setItemSpy).not.toHaveBeenCalled();
     });
   });
 });
