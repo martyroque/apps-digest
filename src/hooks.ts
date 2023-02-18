@@ -1,22 +1,20 @@
 import { useCallback, useMemo } from 'react';
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 
-import { AppsDigestStoreDefinition } from './types';
+import { AppsDigestStoreConstructable } from './types';
 import { AppsDigestContainer } from './AppsDigestContainer';
 import { AppsDigestReadOnlyValueInterface } from './AppsDigestValue';
 
-function useAppsDigestStore<S>(
-  storeDefinition: AppsDigestStoreDefinition<S>,
-): S {
+function useAppsDigestStore<S>(store: AppsDigestStoreConstructable<S>): S {
   const appsDigestContainer = AppsDigestContainer.getInstance();
 
   const [getStore, cleanup] = useMemo(() => {
-    const store = appsDigestContainer.get(storeDefinition);
+    const storeInstance = appsDigestContainer.get(store);
     return [
-      () => store,
+      () => storeInstance,
       () => {
         return () => {
-          appsDigestContainer.remove(storeDefinition);
+          appsDigestContainer.remove(store);
         };
       },
     ];

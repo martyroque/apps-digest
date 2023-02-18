@@ -1,6 +1,5 @@
 import { AppsDigestInjectable } from '../AppsDigestInjectable';
 import { AppsDigestContainer } from '../AppsDigestContainer';
-import { generateStoreDefinition } from '../utils';
 
 const storeContainer = AppsDigestContainer.getInstance();
 
@@ -10,27 +9,23 @@ class MockSubStore {
   destroy = mockDestroy;
 }
 
-const mockSubStoreDefinition = generateStoreDefinition(MockSubStore);
-
 class MockStore extends AppsDigestInjectable {
-  public subStore = this.inject(mockSubStoreDefinition);
+  public subStore = this.inject(MockSubStore);
 }
-
-const mockStoreDefinition = generateStoreDefinition(MockStore);
 
 describe('AppsDigestInjectable tests', () => {
   it('should inject a store', () => {
-    const mockStore = storeContainer.get(mockStoreDefinition);
+    const mockStore = storeContainer.get(MockStore);
 
     expect(mockStore.subStore).toBeInstanceOf(MockSubStore);
 
-    storeContainer.remove(mockStoreDefinition);
+    storeContainer.remove(MockStore);
   });
 
   it('should destroy injected store when main store is destroyed', () => {
-    storeContainer.get(mockStoreDefinition);
+    storeContainer.get(MockStore);
 
-    storeContainer.remove(mockStoreDefinition);
+    storeContainer.remove(MockStore);
 
     expect(mockDestroy).toHaveBeenCalled();
   });
