@@ -1,7 +1,6 @@
 import { AppsDigestStore } from '../AppsDigestStore';
 import { AppsDigestContainer } from '../AppsDigestContainer';
 import { AppsDigestValue } from '../AppsDigestValue';
-import { generateStoreDefinition } from '../utils';
 
 const storeContainer = AppsDigestContainer.getInstance();
 
@@ -11,12 +10,10 @@ class MockSubStore {
   stringValue = new AppsDigestValue<string | undefined>(undefined);
 }
 
-const mockSubStoreDefinition = generateStoreDefinition(MockSubStore);
-
 const mockSubscribeCallback = jest.fn();
 
 class MockStore extends AppsDigestStore {
-  public subStore = this.inject(mockSubStoreDefinition);
+  public subStore = this.inject(MockSubStore);
 
   public computed = this.computedValue(
     [this.subStore.boolValue, this.subStore.stringValue],
@@ -31,19 +28,17 @@ class MockStore extends AppsDigestStore {
   }
 }
 
-const mockStoreDefinition = generateStoreDefinition(MockStore);
-
 describe('AppsDigestStore tests', () => {
   let mockStore: MockStore;
   let mockSubStore: MockSubStore;
   beforeEach(() => {
     jest.clearAllMocks();
-    mockStore = storeContainer.get(mockStoreDefinition);
-    mockSubStore = storeContainer.get(mockSubStoreDefinition);
+    mockStore = storeContainer.get(MockStore);
+    mockSubStore = storeContainer.get(MockSubStore);
   });
 
   afterEach(() => {
-    storeContainer.remove(mockStoreDefinition);
+    storeContainer.remove(MockStore);
   });
 
   describe('subscribeToStoreValue', () => {
@@ -54,7 +49,7 @@ describe('AppsDigestStore tests', () => {
     });
 
     it('should unsubscribe from all values when main store is removed', () => {
-      storeContainer.remove(mockStoreDefinition);
+      storeContainer.remove(MockStore);
 
       mockSubStore.testValue.publish(2);
 
@@ -78,7 +73,7 @@ describe('AppsDigestStore tests', () => {
       mockSubStore.boolValue.publish(false);
       mockSubStore.stringValue.publish(undefined);
 
-      storeContainer.remove(mockStoreDefinition);
+      storeContainer.remove(MockStore);
 
       mockSubStore.boolValue.publish(true);
       mockSubStore.stringValue.publish('TEST');

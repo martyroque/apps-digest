@@ -1,4 +1,9 @@
-import { AppsDigestStoreInterface, AppsDigestStoreDefinition } from './types';
+import {
+  AppsDigestStoreInterface,
+  AppsDigestStoreDefinition,
+  AppsDigestStoreConstructable,
+} from './types';
+import { generateStoreDefinition } from './utils';
 
 type StoreRecord = {
   instance: AppsDigestStoreInterface;
@@ -37,7 +42,24 @@ class AppsDigestContainer {
     return AppsDigestContainer.instance;
   }
 
-  public get<S>(storeDefinition: AppsDigestStoreDefinition<S>): S {
+  public getStoreDefinition<S>(
+    store: AppsDigestStoreConstructable<S>,
+  ): AppsDigestStoreDefinition<S> {
+    if ('getStoreDefinition' in store.prototype) {
+      return store.prototype.getStoreDefinition();
+    }
+
+    const storeDefinition = generateStoreDefinition(store);
+    Object.assign(store.prototype, {
+      getStoreDefinition: () => storeDefinition,
+    });
+
+    return storeDefinition;
+  }
+
+  public get<S>(store: AppsDigestStoreConstructable<S>): S {
+    const storeDefinition = this.getStoreDefinition(store);
+
     if (!this.stores.has(storeDefinition.storeId)) {
       this.instantiate(storeDefinition);
     }
@@ -52,7 +74,8 @@ class AppsDigestContainer {
     return storeRecord.instance as S;
   }
 
-  public remove<S>(storeDefinition: AppsDigestStoreDefinition<S>) {
+  public remove<S>(store: AppsDigestStoreConstructable<S>) {
+    const storeDefinition = this.getStoreDefinition(store);
     const storeRecord = this.stores.get(storeDefinition.storeId);
 
     if (!storeRecord) {

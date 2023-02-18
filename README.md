@@ -2,7 +2,7 @@
 
 _Simple, atomic state management._
 
-[![npm version](https://badge.fury.io/js/apps-digest.svg)](https://badge.fury.io/js/apps-digest) [![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&amp;utm_medium=badge&amp;utm_campaign=rate-badge)
+[![npm version](https://badge.fury.io/js/apps-digest.svg)](https://badge.fury.io/js/apps-digest) [![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&utm_medium=badge&utm_campaign=rate-badge)
 
 ---
 
@@ -38,7 +38,7 @@ With App's Digest you can manage your application state outside of any UI framew
 
 ## Prerequisites
 
-- Node >= 12
+- Node >= 14
 - React >= 16.9.0 (Optional)
 
 ## Installation
@@ -50,8 +50,13 @@ npm install apps-digest
 ## A quick example
 
 ```javascript
-// Counter Store
-import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+  AppsDigestValue,
+  useAppsDigestStore,
+  useAppsDigestValue,
+} from 'apps-digest';
 
 class CounterStore {
   count = new AppsDigestValue(0);
@@ -61,14 +66,6 @@ class CounterStore {
     this.count.publish(currentCount + 1);
   }
 }
-
-export default generateStoreDefinition(CounterStore);
-
-// Counter View
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
-import CounterStore from './CounterStore';
 
 const CounterView = () => {
   const counterStore = useAppsDigestStore(CounterStore);
@@ -91,7 +88,7 @@ App's Digest leverages on two software architecture patterns:
 - IoC Container pattern (a.k.a. DI Container) to manage store instantiation, dependency injection and lifecycle.
 - The publisher-subscriber pattern to implement values within the stores that any JavaScript context (including React components) can subscribe and publish to.
 
-![App's Digest Flow](https://raw.githubusercontent.com/martyroque/emrock-blog/22a90734b18b9642bd4012c11ced3dbf7ea6db98/public/images/apps_digest_flow.jpeg)
+![App's Digest Flow](https://emrock-app.s3.us-east-2.amazonaws.com/uploads/apps-digest-flow.png)
 
 ### What's a Store?
 
@@ -104,13 +101,14 @@ Let's take a closer look on how to use the library.
 ### Create a store
 
 First, let's create our store. A store is a class that implements the following:
+
 - Store value(s) by instantiating `AppsDigestValue` with an initial value (required).
 - Value setters that publish (updates) the store values (optional).
 
-Once the store has been created, we need to generate the store definition, which will be used by the container to identify our store in memory.
+Note: It is a good pattern to keep your stores separate from your UI.
 
 ```javascript
-import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
+import { AppsDigestValue } from 'apps-digest';
 
 class CounterStore {
   count = new AppsDigestValue(0);
@@ -121,7 +119,7 @@ class CounterStore {
   }
 }
 
-export default generateStoreDefinition(CounterStore);
+export default CounterStore;
 ```
 
 ### Use the store anywhere
@@ -194,11 +192,7 @@ With App's Digest, we can have segregated stores that contain a small meaningful
 Let's say we have a store that needs to read the count value from our `CounterStore`. We can easily inject the store like this:
 
 ```javascript
-import {
-  AppsDigestValue,
-  AppsDigestStore,
-  generateStoreDefinition,
-} from 'apps-digest';
+import { AppsDigestValue, AppsDigestStore } from 'apps-digest';
 import CounterStore from './CounterStore';
 
 class ApplicationStore extends AppsDigestStore {
@@ -216,7 +210,7 @@ class ApplicationStore extends AppsDigestStore {
   }
 }
 
-export default generateStoreDefinition(ApplicationStore);
+export default ApplicationStore;
 ```
 
 By extending from `AppsDigestStore`, we get the automatic un-subscription for free when the store is disposed.
@@ -228,11 +222,11 @@ In order to persist a store value, we need to specify the persist key we would l
 Every time the value is published, the value will be persisted. And, the next time the store is instantiated, the value will be rehydrated.
 
 ```javascript
-  // assuming CountValue was persisted as 2, count will be hydrated with 2 instead of 0
-  count = new AppsDigestValue(0, 'CountValue');
+// assuming CountValue was persisted as 2, count will be hydrated with 2 instead of 0
+count = new AppsDigestValue(0, 'CountValue');
 
-  // this will persist the new value
-  this.count.publish(currentCount + 1);
+// this will persist the new value
+this.count.publish(currentCount + 1);
 ```
 
 ## Computed Values
@@ -244,23 +238,19 @@ Let's say we have a store that manages the user session, and we have a `isAuth` 
 ### ApiStore
 
 ```javascript
-import { AppsDigestValue, generateStoreDefinition } from 'apps-digest';
+import { AppsDigestValue } from 'apps-digest';
 
 class ApiStore {
   isConnected = new AppsDigestValue(false);
 }
 
-export default generateStoreDefinition(ApiStore);
+export default ApiStore;
 ```
 
 ### UserStore
 
 ```javascript
-import {
-  AppsDigestValue,
-  AppsDigestStore,
-  generateStoreDefinition,
-} from 'apps-digest';
+import { AppsDigestValue, AppsDigestStore } from 'apps-digest';
 import ApiStore from './ApiStore';
 
 class UserStore extends AppsDigestStore {
@@ -274,13 +264,13 @@ class UserStore extends AppsDigestStore {
   );
 }
 
-export default generateStoreDefinition(UserStore);
+export default UserStore;
 ```
 
 With this, `shouldMakeRequest` will track both `isAuth` and `isConnected` values and produce a single `boolean` value as a result. This computed value can be used as a regular store value anywhere in our app.
 
 ```javascript
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
 import UserStore from './UserStore';
@@ -311,4 +301,4 @@ ReactDOM.render(<App />, document.body);
 
 [ISC License](LICENSE)
 
-Copyright © 2022 [Marty Roque](https://github.com/martyroque).
+Copyright © 2023 [Marty Roque](https://github.com/martyroque).
