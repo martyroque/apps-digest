@@ -15,52 +15,86 @@ type Subscriber<V> = {
   callback: (value: V) => void;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+type MaybePromisify<T> = T | Promise<T>;
+
+type PromisifyMethods<T> = {
+  [K in keyof T]: T[K] extends AnyFunction
+    ? (...args: Parameters<T[K]>) => MaybePromisify<ReturnType<T[K]>>
+    : T[K];
+};
+
+export type SupportedStorage = PromisifyMethods<
+  Pick<Storage, 'getItem' | 'setItem'>
+>;
+
+export type AppsDigestValueOptions = {
+  storage: SupportedStorage;
+};
+
 class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
   private value: V;
   private subscribers: Map<string, Subscriber<V>> = new Map();
   private persistKey?: string;
+  private storage?: SupportedStorage;
 
-  constructor(initialValue: V, persistKey?: string) {
-    let value = initialValue;
+  constructor(
+    initialValue: V,
+    persistKey?: string,
+    options?: AppsDigestValueOptions,
+  ) {
+    this.value = initialValue;
+    this.persistKey = persistKey;
 
     if (persistKey) {
-      this.persistKey = persistKey;
-      const rawPersistedValue = localStorage.getItem(persistKey);
-      if (rawPersistedValue) {
-        try {
-          value = JSON.parse(rawPersistedValue);
-        } catch (error) {
-          console.warn(
-            `Could not parse value ${rawPersistedValue} for ${persistKey}. Error:`,
-            error,
-          );
-        }
-      } else {
-        localStorage.setItem(persistKey, JSON.stringify(initialValue));
-      }
+      this.storage = options?.storage || localStorage;
     }
-
-    this.value = value;
 
     this.currentValue = this.currentValue.bind(this);
     this.publish = this.publish.bind(this);
     this.subscribe = this.subscribe.bind(this);
     this.unsubscribe = this.unsubscribe.bind(this);
+
+    this.hydrate();
   }
 
-  currentValue(): V {
+  private async hydrate() {
+    if (this.persistKey && this.storage) {
+      const rawPersistedValue = await this.storage.getItem(this.persistKey);
+
+      if (rawPersistedValue) {
+        try {
+          const persistedValue: V = JSON.parse(rawPersistedValue);
+
+          this.publish(persistedValue);
+        } catch (error) {
+          console.error(
+            `Could not parse value ${rawPersistedValue} for ${this.persistKey}. Error:`,
+            error,
+          );
+        }
+      } else {
+        // fire-and-forget
+        this.storage.setItem(this.persistKey, JSON.stringify(this.value));
+      }
+    }
+  }
+
+  public currentValue(): V {
     return this.value;
   }
 
-  publish(newValue: V) {
+  public publish(newValue: V) {
     if (newValue === this.value) {
       return false;
     }
 
     this.value = newValue;
 
-    if (newValue !== undefined && this.persistKey) {
-      localStorage.setItem(this.persistKey, JSON.stringify(newValue));
+    if (newValue !== undefined && this.persistKey && this.storage) {
+      // fire-and-forget
+      this.storage.setItem(this.persistKey, JSON.stringify(newValue));
     }
 
     for (const [, subscriber] of this.subscribers) {
@@ -70,7 +104,7 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
     return true;
   }
 
-  subscribe(callback: (value: V) => void) {
+  public subscribe(callback: (value: V) => void) {
     const subId = nanoid();
 
     this.subscribers.set(subId, { callback });
@@ -78,7 +112,7 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
     return subId;
   }
 
-  unsubscribe(subId: string) {
+  public unsubscribe(subId: string) {
     if (!this.subscribers.has(subId)) {
       console.warn(`Subscriber ${subId} not found`);
       return false;

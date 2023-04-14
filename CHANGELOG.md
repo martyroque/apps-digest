@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] - 2023-04-13
+
+### Added
+
+- Add support for React Native.
+- Add support for custom persistency storage.
+
+## [0.2.0] - 2023-02-17
+
+### Changed
+
+- Abstract the store definition generation to the store container by
+adding a `getStoreDefinition` method to the store prototype, making it
+simpler to just export the stores instead of manually generating the
+store definition before exporting or using the store.
+
+### Removed
+
+- Remove `generateStoreDefinition` from library exports.
+
 ## [0.1.0] - 2022-12-09
 
 ### Changed

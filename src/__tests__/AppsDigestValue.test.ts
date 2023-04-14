@@ -38,16 +38,19 @@ describe('AppsDigestValue tests', () => {
     });
 
     describe('persistency on publish tests', () => {
-      it('should persist the new value if persist key is defined', () => {
+      it('should persist the new value if persist key is defined', async () => {
         const expectedValue = 'initial value';
         const persistedKey = 'persisted_key';
+        const newValue = 'test';
         const value = new AppsDigestValue(expectedValue, persistedKey);
 
-        value.publish('test');
+        await new Promise(process.nextTick);
+
+        value.publish(newValue);
 
         expect(setItemSpy).toHaveBeenCalledWith(
           persistedKey,
-          JSON.stringify(expectedValue),
+          JSON.stringify(newValue),
         );
       });
 
@@ -116,22 +119,28 @@ describe('AppsDigestValue tests', () => {
   });
 
   describe('persistency tests', () => {
-    it('should hydrate persisted value when persisted value exists', () => {
+    it('should hydrate persisted value when persisted value exists', async () => {
       const expectedValue = [1, 2, 3];
       const persistedKey = 'persisted_key';
       new AppsDigestValue(expectedValue, persistedKey);
 
+      await new Promise(process.nextTick);
+
       const value = new AppsDigestValue(null, persistedKey);
+
+      await new Promise(process.nextTick);
 
       expect(getItemSpy).toHaveBeenCalledWith(persistedKey);
       expect(value.currentValue()).toEqual(expectedValue);
     });
 
-    it('should create new persisted value when persisted value does not exist', () => {
+    it('should create new persisted value when persisted value does not exist', async () => {
       const expectedValue = false;
       const persistedKey = 'persisted_key';
 
       const value = new AppsDigestValue(expectedValue, persistedKey);
+
+      await new Promise(process.nextTick);
 
       expect(setItemSpy).toHaveBeenCalledWith(
         persistedKey,
@@ -140,10 +149,61 @@ describe('AppsDigestValue tests', () => {
       expect(value.currentValue()).toEqual(expectedValue);
     });
 
-    it('should not create new persisted value when persisted key is not defined', () => {
+    it('should not create new persisted value when persisted key is not defined', async () => {
       new AppsDigestValue(false);
 
+      await new Promise(process.nextTick);
+
       expect(setItemSpy).not.toHaveBeenCalled();
+    });
+
+    describe('with custom storage', () => {
+      const customStorage = {
+        setItem: jest.fn(),
+        getItem: jest.fn(),
+      };
+
+      it('should hydrate persisted value when persisted value exists', async () => {
+        const expectedValue = [1, 2, 3];
+        const persistedKey = 'persisted_key';
+        customStorage.getItem.mockReturnValueOnce(
+          Promise.resolve(JSON.stringify(expectedValue)),
+        );
+
+        const value = new AppsDigestValue(null, persistedKey, {
+          storage: customStorage,
+        });
+
+        await new Promise(process.nextTick);
+
+        expect(customStorage.getItem).toHaveBeenCalledWith(persistedKey);
+        expect(value.currentValue()).toEqual(expectedValue);
+      });
+
+      it('should create new persisted value when persisted value does not exist', async () => {
+        const expectedValue = false;
+        const persistedKey = 'persisted_key';
+
+        const value = new AppsDigestValue(expectedValue, persistedKey, {
+          storage: customStorage,
+        });
+
+        await new Promise(process.nextTick);
+
+        expect(customStorage.setItem).toHaveBeenCalledWith(
+          persistedKey,
+          JSON.stringify(expectedValue),
+        );
+        expect(value.currentValue()).toEqual(expectedValue);
+      });
+
+      it('should not create new persisted value when persisted key is not defined', async () => {
+        new AppsDigestValue(false);
+
+        await new Promise(process.nextTick);
+
+        expect(customStorage.setItem).not.toHaveBeenCalled();
+      });
     });
   });
 });
