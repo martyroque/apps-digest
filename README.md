@@ -33,6 +33,7 @@ With App's Digest you can manage your application state outside of any UI framew
 - [Dependency](#dependency-injection)
 - [Persistency](#persistency)
 - [Computed Values](#computed-values)
+- [React Native](#react-native)
 - [Author](#author)
 - [License](#license)
 
@@ -229,6 +230,18 @@ count = new AppsDigestValue(0, 'CountValue');
 this.count.publish(currentCount + 1);
 ```
 
+### Persistency - Custom Storage
+
+You can configure App's Digest values to use custom storage for persistency. For instance, in React Native, you can use `AsyncStorage`:
+
+```javascript
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+count = new AppsDigestValue(0, 'CountValue', {
+  storage: AsyncStorage,
+});
+```
+
 ## Computed Values
 
 Sometimes we have complex stores with several values that we then need to use to derive a value from. App's Digest offers computed values feature, which allows us to consume store values, compute them in a callback and produce a single result. To do so, we need our store to extend from `AppsDigestStore`.
@@ -289,6 +302,30 @@ const App = () => {
 };
 
 ReactDOM.render(<App />, document.body);
+```
+
+## React Native
+
+App's Digest uses `nanoid` for a secure unique string ID generation to create value subscriptions and store identifiers. React Native does not have built-in random generator. The following polyfill works for plain React Native and Expo starting with 39.x.
+
+```javascript
+// App.jsx
+import 'react-native-get-random-values'
+import { View } from 'react-native';
+import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+
+import YourStore from './YourStore';
+
+export default function App() {
+  const store = useAppsDigestStore(YourStore);
+  const value = useAppsDigestValue(store.value);
+
+  return (
+    <View>
+      {/* ... */}
+    </View>
+  );
+}
 ```
 
 ## Author
