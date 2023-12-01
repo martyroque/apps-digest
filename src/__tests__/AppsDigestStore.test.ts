@@ -43,7 +43,7 @@ describe('AppsDigestStore tests', () => {
 
   describe('subscribeToStoreValue', () => {
     it('should subscribe to any store value', () => {
-      mockSubStore.testValue.publish(2);
+      mockSubStore.testValue.value = 2;
 
       expect(mockSubscribeCallback).toHaveBeenCalledWith(2);
     });
@@ -51,7 +51,7 @@ describe('AppsDigestStore tests', () => {
     it('should unsubscribe from all values when main store is removed', () => {
       storeContainer.remove(MockStore);
 
-      mockSubStore.testValue.publish(2);
+      mockSubStore.testValue.value = 2;
 
       expect(mockSubscribeCallback).not.toHaveBeenCalled();
     });
@@ -59,26 +59,26 @@ describe('AppsDigestStore tests', () => {
 
   describe('computedValue', () => {
     it('should return initial computed value', () => {
-      expect(mockStore.computed.currentValue()).toBe(false);
+      expect(mockStore.computed.value).toBe(false);
     });
 
     it('should return updated computed value', () => {
-      mockSubStore.boolValue.publish(true);
-      mockSubStore.stringValue.publish('TEST');
+      mockSubStore.boolValue.value = true;
+      mockSubStore.stringValue.value = 'TEST';
 
-      expect(mockStore.computed.currentValue()).toBe(true);
+      expect(mockStore.computed.value).toBe(true);
     });
 
     it('should not update computed value when main store is removed', () => {
-      mockSubStore.boolValue.publish(false);
-      mockSubStore.stringValue.publish(undefined);
+      mockSubStore.boolValue.value = false;
+      mockSubStore.stringValue.value = undefined;
 
       storeContainer.remove(MockStore);
 
-      mockSubStore.boolValue.publish(true);
-      mockSubStore.stringValue.publish('TEST');
+      mockSubStore.boolValue.value = true;
+      mockSubStore.stringValue.value = 'TEST';
 
-      expect(mockStore.computed.currentValue()).toBe(false);
+      expect(mockStore.computed.value).toBe(false);
     });
   });
 });

@@ -15,26 +15,22 @@ describe('AppsDigestValue tests', () => {
     localStorage.clear();
   });
 
-  describe('currentValue tests', () => {
+  describe('getter tests', () => {
     it('should get the current value', () => {
       const initialValue = 'test value';
       const value = new AppsDigestValue(initialValue);
 
-      expect(value.currentValue()).toBe(initialValue);
+      expect(value.value).toBe(initialValue);
     });
   });
 
   describe('publish tests', () => {
-    it('should return false when publishing the same value', () => {
-      const value = new AppsDigestValue(2);
-
-      expect(value.publish(2)).toBe(false);
-    });
-
-    it('should return true when publishing a different value', () => {
+    it('should update to the new value', () => {
       const value = new AppsDigestValue('');
 
-      expect(value.publish('test')).toBe(true);
+      value.value = 'test';
+
+      expect(value.value).toBe('test');
     });
 
     describe('persistency on publish tests', () => {
@@ -46,7 +42,7 @@ describe('AppsDigestValue tests', () => {
 
         await new Promise(process.nextTick);
 
-        value.publish(newValue);
+        value.value = newValue;
 
         expect(setItemSpy).toHaveBeenCalledWith(
           persistedKey,
@@ -57,7 +53,7 @@ describe('AppsDigestValue tests', () => {
       it('should not persist the new value if persist key is not defined', () => {
         const value = new AppsDigestValue<number>(2);
 
-        value.publish(3);
+        value.value = 3;
 
         expect(setItemSpy).not.toHaveBeenCalled();
       });
@@ -67,7 +63,7 @@ describe('AppsDigestValue tests', () => {
         const value = new AppsDigestValue(2, persistedKey);
         setItemSpy.mockClear();
 
-        value.publish(2);
+        value.value = 2;
 
         expect(setItemSpy).not.toHaveBeenCalled();
       });
@@ -77,7 +73,7 @@ describe('AppsDigestValue tests', () => {
         const value = new AppsDigestValue<number | undefined>(2, persistedKey);
         setItemSpy.mockClear();
 
-        value.publish(undefined);
+        value.value = undefined;
 
         expect(setItemSpy).not.toHaveBeenCalled();
       });
@@ -91,7 +87,7 @@ describe('AppsDigestValue tests', () => {
       value.subscribe(callback);
 
       const newVal = 'test';
-      value.publish(newVal);
+      value.value = newVal;
 
       expect(callback).toHaveBeenCalledWith(newVal);
     });
@@ -112,9 +108,14 @@ describe('AppsDigestValue tests', () => {
 
     it('should return true if the subscriber ID is found and deleted', () => {
       const value = new AppsDigestValue('');
-      const subId = value.subscribe(() => undefined);
+      const callback = jest.fn();
+      const subId = value.subscribe(callback);
 
       expect(value.unsubscribe(subId)).toBe(true);
+
+      value.value = 'test';
+
+      expect(callback).not.toHaveBeenCalled();
     });
   });
 
@@ -131,7 +132,7 @@ describe('AppsDigestValue tests', () => {
       await new Promise(process.nextTick);
 
       expect(getItemSpy).toHaveBeenCalledWith(persistedKey);
-      expect(value.currentValue()).toEqual(expectedValue);
+      expect(value.value).toEqual(expectedValue);
     });
 
     it('should create new persisted value when persisted value does not exist', async () => {
@@ -146,7 +147,7 @@ describe('AppsDigestValue tests', () => {
         persistedKey,
         JSON.stringify(expectedValue),
       );
-      expect(value.currentValue()).toEqual(expectedValue);
+      expect(value.value).toEqual(expectedValue);
     });
 
     it('should not create new persisted value when persisted key is not defined', async () => {
@@ -177,7 +178,7 @@ describe('AppsDigestValue tests', () => {
         await new Promise(process.nextTick);
 
         expect(customStorage.getItem).toHaveBeenCalledWith(persistedKey);
-        expect(value.currentValue()).toEqual(expectedValue);
+        expect(value.value).toEqual(expectedValue);
       });
 
       it('should create new persisted value when persisted value does not exist', async () => {
@@ -194,7 +195,7 @@ describe('AppsDigestValue tests', () => {
           persistedKey,
           JSON.stringify(expectedValue),
         );
-        expect(value.currentValue()).toEqual(expectedValue);
+        expect(value.value).toEqual(expectedValue);
       });
 
       it('should not create new persisted value when persisted key is not defined', async () => {

@@ -55,22 +55,22 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {
   AppsDigestValue,
-  useAppsDigestStore,
-  useAppsDigestValue,
+  useStore,
+  useValue,
 } from 'apps-digest';
 
 class CounterStore {
   count = new AppsDigestValue(0);
 
   increment() {
-    const currentCount = this.count.currentValue();
-    this.count.publish(currentCount + 1);
+    const currentCount = this.count.value;
+    this.count.value = currentCount + 1;
   }
 }
 
 const CounterView = () => {
-  const counterStore = useAppsDigestStore(CounterStore);
-  const count = useAppsDigestValue(counterStore.count);
+  const counterStore = useStore(CounterStore);
+  const count = useValue(counterStore.count);
 
   return (
     <button onClick={() => counterStore.increment()}>
@@ -115,8 +115,8 @@ class CounterStore {
   count = new AppsDigestValue(0);
 
   increment() {
-    const currentCount = this.count.currentValue();
-    this.count.publish(currentCount + 1);
+    const currentCount = this.count.value;
+    this.count.value = currentCount + 1;
   }
 }
 
@@ -156,19 +156,19 @@ storeContainer.remove(CounterStore);
 
 All right, let's use our store in a UI using React (we'll support frameworks in the future).
 
-First we need to get our store instance by using the `useAppsDigestStore`. Then we can use the hook `useAppsDigestValue` to subscribe to the store value and trigger the side effects (render).
+First we need to get our store instance by using the `useStore`. Then we can use the hook `useValue` to subscribe to the store value and trigger the side effects (render).
 
 By using these hooks, we get automatic value un-subscription and store disposal for free when the component is unmounted.
 
 ```javascript
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+import { useStore, useValue } from 'apps-digest';
 import CounterStore from './CounterStore';
 
 const CounterView = () => {
-  const counterStore = useAppsDigestStore(CounterStore);
-  const count = useAppsDigestValue(counterStore.count);
+  const counterStore = useStore(CounterStore);
+  const count = useValue(counterStore.count);
 
   return (
     <button onClick={() => counterStore.increment()}>
@@ -204,8 +204,8 @@ class ApplicationStore extends AppsDigestStore {
     super();
 
     this.subscribeToStoreValue(this.counterStore.count, (count) => {
-      if (!this.isMax.currentValue() && count >= 10) {
-        this.isMax.publish(true);
+      if (!this.isMax.value && count >= 10) {
+        this.isMax.value = true;
       }
     });
   }
@@ -227,7 +227,7 @@ Every time the value is published, the value will be persisted. And, the next ti
 count = new AppsDigestValue(0, 'CountValue');
 
 // this will persist the new value
-this.count.publish(currentCount + 1);
+this.count.value = currentCount + 1;
 ```
 
 ### Persistency - Custom Storage
@@ -285,12 +285,12 @@ With this, `shouldMakeRequest` will track both `isAuth` and `isConnected` values
 ```javascript
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+import { useStore, useValue } from 'apps-digest';
 import UserStore from './UserStore';
 
 const App = () => {
-  const userStore = useAppsDigestStore(UserStore);
-  const shouldMakeRequest = useAppsDigestValue(userStore.shouldMakeRequest);
+  const userStore = useStore(UserStore);
+  const shouldMakeRequest = useValue(userStore.shouldMakeRequest);
 
   useEffect(() => {
     if (shouldMakeRequest) {
@@ -312,13 +312,13 @@ App's Digest uses `nanoid` for a secure unique string ID generation to create va
 // App.jsx
 import 'react-native-get-random-values'
 import { View } from 'react-native';
-import { useAppsDigestStore, useAppsDigestValue } from 'apps-digest';
+import { useStore, useValue } from 'apps-digest';
 
 import YourStore from './YourStore';
 
 export default function App() {
-  const store = useAppsDigestStore(YourStore);
-  const value = useAppsDigestValue(store.value);
+  const store = useStore(YourStore);
+  const value = useValue(store.value);
 
   return (
     <View>

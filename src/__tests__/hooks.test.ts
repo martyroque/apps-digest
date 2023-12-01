@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { AppsDigestValue } from '../AppsDigestValue';
-import { useAppsDigestStore, useAppsDigestValue } from '../hooks';
+import { useStore, useValue } from '../hooks';
 
 const mockDestroy = jest.fn();
 
@@ -11,17 +11,15 @@ class MockStore {
 }
 
 describe('AppsDigest hooks tests', () => {
-  describe('useAppsDigestStore', () => {
+  describe('useStore', () => {
     it('should return the store instance', () => {
-      const { result } = renderHook(() => useAppsDigestStore(MockStore));
+      const { result } = renderHook(() => useStore(MockStore));
 
       expect(result.current).toBeInstanceOf(MockStore);
     });
 
     it('should remove the store instance', () => {
-      const { unmount, rerender } = renderHook(() =>
-        useAppsDigestStore(MockStore),
-      );
+      const { unmount, rerender } = renderHook(() => useStore(MockStore));
 
       // trigger some rerenders to ensure a single store reference
       rerender();
@@ -34,25 +32,25 @@ describe('AppsDigest hooks tests', () => {
     });
   });
 
-  describe('useAppsDigestValue', () => {
+  describe('useValue', () => {
     let store: MockStore;
 
     beforeEach(() => {
-      const { result } = renderHook(() => useAppsDigestStore(MockStore));
+      const { result } = renderHook(() => useStore(MockStore));
       store = result.current;
     });
 
     it('should return the initial value', () => {
-      const { result } = renderHook(() => useAppsDigestValue(store.testValue));
+      const { result } = renderHook(() => useValue(store.testValue));
 
       expect(result.current).toBe(1);
     });
 
     it('should subscribe to the value', () => {
-      const { result } = renderHook(() => useAppsDigestValue(store.testValue));
+      const { result } = renderHook(() => useValue(store.testValue));
 
       act(() => {
-        store.testValue.publish(2);
+        store.testValue.value = 2;
       });
 
       expect(result.current).toBe(2);
@@ -60,11 +58,11 @@ describe('AppsDigest hooks tests', () => {
 
     it('should unsubscribe from the value when unmounted', () => {
       const { result, unmount, rerender } = renderHook(() =>
-        useAppsDigestValue(store.testValue),
+        useValue(store.testValue),
       );
 
       act(() => {
-        store.testValue.publish(2);
+        store.testValue.value = 2;
       });
 
       // trigger some rerenders to ensure a single subscription
@@ -75,7 +73,7 @@ describe('AppsDigest hooks tests', () => {
       unmount();
 
       act(() => {
-        store.testValue.publish(3);
+        store.testValue.value = 3;
       });
 
       expect(result.current).toBe(2);
