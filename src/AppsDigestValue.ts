@@ -1,14 +1,14 @@
 import { nanoid } from 'nanoid';
 
 interface AppsDigestReadOnlyValueInterface<V> {
-  currentValue: () => V;
+  readonly value: V;
   subscribe: (callback: (value: V) => void) => string;
   unsubscribe: (subId: string) => boolean;
 }
 
 interface AppsDigestValueInterface<V>
   extends AppsDigestReadOnlyValueInterface<V> {
-  publish: (newValue: V) => boolean;
+  value: V;
 }
 
 type Subscriber<V> = {
@@ -34,7 +34,7 @@ export type AppsDigestValueOptions = {
 };
 
 class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
-  private value: V;
+  private _value: V;
   private subscribers: Map<string, Subscriber<V>> = new Map();
   private persistKey?: string;
   private storage?: SupportedStorage;
@@ -44,15 +44,13 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
     persistKey?: string,
     options?: AppsDigestValueOptions,
   ) {
-    this.value = initialValue;
+    this._value = initialValue;
     this.persistKey = persistKey;
 
     if (persistKey) {
       this.storage = options?.storage || localStorage;
     }
 
-    this.currentValue = this.currentValue.bind(this);
-    this.publish = this.publish.bind(this);
     this.subscribe = this.subscribe.bind(this);
     this.unsubscribe = this.unsubscribe.bind(this);
 
@@ -67,7 +65,7 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
         try {
           const persistedValue: V = JSON.parse(rawPersistedValue);
 
-          this.publish(persistedValue);
+          this.value = persistedValue;
         } catch (error) {
           console.error(
             `Could not parse value ${rawPersistedValue} for ${this.persistKey}. Error:`,
@@ -81,16 +79,16 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
     }
   }
 
-  public currentValue(): V {
-    return this.value;
+  public get value(): V {
+    return this._value;
   }
 
-  public publish(newValue: V) {
+  public set value(newValue: V) {
     if (newValue === this.value) {
-      return false;
+      return;
     }
 
-    this.value = newValue;
+    this._value = newValue;
 
     if (newValue !== undefined && this.persistKey && this.storage) {
       // fire-and-forget
@@ -100,8 +98,6 @@ class AppsDigestValue<V> implements AppsDigestValueInterface<V> {
     for (const [, subscriber] of this.subscribers) {
       subscriber.callback(this.value);
     }
-
-    return true;
   }
 
   public subscribe(callback: (value: V) => void) {

@@ -45,7 +45,7 @@ abstract class AppsDigestStore
   ): AppsDigestReadOnlyValueInterface<V> {
     function getComputedValue(): V {
       const values = storeValues.map((storeValue) => {
-        return storeValue.currentValue();
+        return storeValue.value;
       });
 
       return callback(...(values as UnwrappedAppsDigestValues<A>));
@@ -56,7 +56,7 @@ abstract class AppsDigestStore
     function computedValueCallback() {
       const newComputedValue = getComputedValue();
 
-      computedValue.publish(newComputedValue);
+      computedValue.value = newComputedValue;
     }
 
     storeValues.forEach((storeValue) => {

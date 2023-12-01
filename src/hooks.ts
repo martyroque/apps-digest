@@ -5,7 +5,7 @@ import { AppsDigestStoreConstructable } from './types';
 import { AppsDigestContainer } from './AppsDigestContainer';
 import { AppsDigestReadOnlyValueInterface } from './AppsDigestValue';
 
-function useAppsDigestStore<S>(store: AppsDigestStoreConstructable<S>): S {
+function useStore<S>(store: AppsDigestStoreConstructable<S>): S {
   const appsDigestContainer = AppsDigestContainer.getInstance();
 
   const [getStore, cleanup] = useMemo(() => {
@@ -23,9 +23,7 @@ function useAppsDigestStore<S>(store: AppsDigestStoreConstructable<S>): S {
   return useSyncExternalStore(cleanup, getStore);
 }
 
-function useAppsDigestValue<V>(
-  storeValue: AppsDigestReadOnlyValueInterface<V>,
-): V {
+function useValue<V>(storeValue: AppsDigestReadOnlyValueInterface<V>): V {
   const subscribe = useCallback((onStoreChange: () => void) => {
     const subId = storeValue.subscribe(onStoreChange);
 
@@ -33,8 +31,9 @@ function useAppsDigestValue<V>(
       storeValue.unsubscribe(subId);
     };
   }, []);
+  const getter = useCallback(() => storeValue.value, [storeValue.value]);
 
-  return useSyncExternalStore(subscribe, storeValue.currentValue);
+  return useSyncExternalStore(subscribe, getter);
 }
 
-export { useAppsDigestStore, useAppsDigestValue };
+export { useStore, useValue };
