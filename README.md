@@ -1,8 +1,8 @@
-# App's Digest
+# App's Digest (DEPRECATED)
 
 _Simple, atomic state management._
 
-[![npm version](https://badge.fury.io/js/apps-digest.svg)](https://badge.fury.io/js/apps-digest) [![Featured on Openbase](https://badges.openbase.com/js/featured/apps-digest.svg?style=openbase&token=LuCH/H1y5l8aDjsBIRWlzGDU0e1s+qmuz7E4bsIfFoQ=)](https://openbase.com/js/apps-digest?utm_source=embedded&utm_medium=badge&utm_campaign=rate-badge)
+**DEPRECATED**: This is no longer supported, please consider using [Nucleux](https://github.com/martyroque/nucleux) instead
 
 ---
 
@@ -53,11 +53,7 @@ npm install apps-digest
 ```javascript
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  AppsDigestValue,
-  useStore,
-  useValue,
-} from 'apps-digest';
+import { AppsDigestValue, useStore, useValue } from 'apps-digest';
 
 class CounterStore {
   count = new AppsDigestValue(0);
@@ -235,7 +231,7 @@ this.count.value = currentCount + 1;
 You can configure App's Digest values to use custom storage for persistency. For instance, in React Native, you can use `AsyncStorage`:
 
 ```javascript
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 count = new AppsDigestValue(0, 'CountValue', {
   storage: AsyncStorage,
@@ -310,7 +306,7 @@ App's Digest uses `nanoid` for a secure unique string ID generation to create va
 
 ```javascript
 // App.jsx
-import 'react-native-get-random-values'
+import 'react-native-get-random-values';
 import { View } from 'react-native';
 import { useStore, useValue } from 'apps-digest';
 
@@ -320,11 +316,7 @@ export default function App() {
   const store = useStore(YourStore);
   const value = useValue(store.value);
 
-  return (
-    <View>
-      {/* ... */}
-    </View>
-  );
+  return <View>{/* ... */}</View>;
 }
 ```
 
