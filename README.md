@@ -2,7 +2,7 @@
 
 _Simple, atomic state management._
 
-**DEPRECATED**: This is no longer supported, please consider using [Nucleux](https://github.com/martyroque/nucleux) instead
+**DEPRECATED**: This is no longer supported, please consider using [Nucleux](https://www.npmjs.com/package/nucleux) instead
 
 ---
 
